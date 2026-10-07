@@ -22,7 +22,7 @@ AI가 매번 새로운 문장을 만들어주고, 문장 속 단어를 클릭하
 |------|------|
 | 프론트엔드 | HTML / CSS / JavaScript (바닐라) |
 | 백엔드 | Vercel Serverless Functions (Python) |
-| AI API | OpenAI GPT-4o-mini |
+| AI API | Google Gemini API |
 | 음성 | Web Speech API (TTS/STT) |
 | 배포 | Vercel |
 
@@ -63,7 +63,7 @@ hola/
 
 3. 환경 변수를 설정합니다.
    ```bash
-   vercel env add OPENAI_API_KEY
+   vercel env add GEMINI_API_KEY
    ```
 
 4. 로컬 서버를 실행합니다.
@@ -85,7 +85,7 @@ vercel --prod
 
 | 변수명 | 설명 |
 |--------|------|
-| `OPENAI_API_KEY` | OpenAI API 키 (필수) |
+| `GEMINI_API_KEY` | Google Gemini API 키 (필수, 선택: GEMINI_MODEL) |
 
 Vercel 대시보드 → Settings → Environment Variables에서 설정합니다.
 
@@ -93,7 +93,7 @@ Vercel 대시보드 → Settings → Environment Variables에서 설정합니다
 
 ## 주요 기능
 
-1. **AI 문장 생성:** 단계별 맞춤 스페인어 문장을 GPT-4o-mini가 생성
+1. **AI 문장 생성:** 단계별 맞춤 스페인어 문장을 Gemini가 생성
 2. **듣기 연습:** Web Speech API(TTS)로 원어민 발음 재생
 3. **발음 체크:** 마이크로 말하면 음성 인식(STT)으로 발음 비교
 4. **단어 탐구:** 문장 속 단어 클릭 시 뜻/예문 표시

@@ -2,10 +2,20 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 
-from openai import OpenAI
+from google import genai
+from google.genai import types
+
+# 사용할 모델 순서. 첫 모델이 없거나 지원 종료되면 다음 모델로 넘어간다.
+# 환경 변수 GEMINI_MODEL 로 첫 번째 모델을 바꿀 수 있다.
+DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash"]
 
 
-def _get_prompt(stage: str, word: str | None = None) -> str:
+def _model_list():
+    custom = os.environ.get("GEMINI_MODEL", "").strip()
+    return ([custom] if custom else []) + DEFAULT_MODELS
+
+
+def _get_prompt(stage, word=None):
     """단계별 프롬프트 생성"""
 
     stage_config = {
@@ -53,6 +63,30 @@ def _get_prompt(stage: str, word: str | None = None) -> str:
 words에는 문장의 핵심 단어 2~4개를 포함해주세요."""
 
 
+def _generate(client, prompt):
+    """모델을 순서대로 시도한다. 모델이 없을 때(404)만 다음 모델로 넘어간다."""
+    last_error = None
+    for model in _model_list():
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.9,
+                    max_output_tokens=600,
+                ),
+            )
+            return response.text
+        except Exception as e:  # noqa: BLE001
+            msg = str(e).lower()
+            if "not found" in msg or "404" in msg or "no longer available" in msg:
+                last_error = e
+                continue
+            raise
+    raise last_error or RuntimeError("사용 가능한 모델이 없습니다.")
+
+
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -67,32 +101,21 @@ class handler(BaseHTTPRequestHandler):
                 return self._error(400, "요청 본문이 비어있어요.")
 
             body = json.loads(self.rfile.read(content_length))
-            stage = body.get("stage", "").strip()
-            word = body.get("word", "").strip() or None
+            stage = str(body.get("stage", "")).strip()
+            word = str(body.get("word", "") or "").strip()[:30] or None
 
             if stage not in ("arrival", "explore", "local"):
                 return self._error(400, "올바른 단계를 선택해주세요.")
 
-            # API 키 확인
-            api_key = os.environ.get("OPENAI_API_KEY")
+            # API 키 확인 (환경 변수)
+            api_key = os.environ.get("GEMINI_API_KEY")
             if not api_key:
                 return self._error(500, "서버 설정 오류: API 키가 없어요.")
 
-            # OpenAI 호출
-            client = OpenAI(api_key=api_key)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a Spanish language tutor. Always respond in valid JSON only."},
-                    {"role": "user", "content": _get_prompt(stage, word)},
-                ],
-                temperature=0.8,
-                max_tokens=500,
-            )
+            client = genai.Client(api_key=api_key)
+            result_text = _generate(client, _get_prompt(stage, word)).strip()
 
-            result_text = response.choices[0].message.content.strip()
-
-            # JSON 파싱 (마크다운 코드블록 제거)
+            # 혹시 마크다운 코드블록이 붙어 있으면 제거
             if result_text.startswith("```"):
                 result_text = result_text.split("\n", 1)[1]
                 if result_text.endswith("```"):
@@ -108,21 +131,23 @@ class handler(BaseHTTPRequestHandler):
             return self._json(200, result)
 
         except json.JSONDecodeError:
-            return self._error(400, "요청 형식이 올바르지 않아요.")
-        except Exception as e:
-            error_msg = str(e)
-            if "rate_limit" in error_msg.lower() or "429" in error_msg:
-                return self._error(429, "요청이 너무 많아요. 잠시 후 다시 시도해주세요.")
+            return self._error(502, "AI 응답을 읽지 못했어요. 다시 시도해주세요.")
+        except Exception as e:  # noqa: BLE001
+            msg = str(e).lower()
+            if "429" in msg or "resource_exhausted" in msg or "quota" in msg:
+                return self._error(429, "무료 사용량이 잠시 가득 찼어요. 1분 뒤에 다시 시도해주세요.")
+            if "api key" in msg or "403" in msg or "401" in msg or "permission" in msg:
+                return self._error(500, "서버 설정 오류: API 키를 확인해주세요.")
             return self._error(500, "문장 생성 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.")
 
-    def _json(self, status: int, data: dict):
+    def _json(self, status, data):
         self.send_response(status)
         self._set_cors_headers()
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
-    def _error(self, status: int, msg: str):
+    def _error(self, status, msg):
         return self._json(status, {"error": msg})
 
     def _set_cors_headers(self):
