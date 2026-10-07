@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hola 올라 — 스페인어 학습</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- 네비게이션 -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#home" class="nav-logo">Hola <span class="nav-logo-kr">올라</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" data-page="home">홈</a></li>
+        <li><a href="#learn" data-page="learn">학습하기</a></li>
+        <li><a href="#passport" data-page="passport">내 여권</a></li>
+        <li><a href="#about" data-page="about">소개</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 메인 컨텐츠 영역 -->
+  <main id="app">
+
+    <!-- 홈 페이지 -->
+    <section class="page" id="page-home">
+      <div class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            <span class="hero-emoji">✈️</span>
+            Hola!<br>
+            <span class="hero-sub">스페인어, 여행하듯 배우자</span>
+          </h1>
+          <p class="hero-desc">
+            AI가 만들어주는 실전 문장으로<br>
+            듣고, 말하고, 익히는 스페인어 학습
+          </p>
+          <a href="#learn" class="btn btn-primary btn-lg">학습 시작하기</a>
+        </div>
+        <div class="hero-stages">
+          <div class="stage-card">
+            <span class="stage-icon">✈️</span>
+            <strong>도착</strong>
+            <p>기초 인사·숫자·주문</p>
+          </div>
+          <div class="stage-card">
+            <span class="stage-icon">🚶</span>
+            <strong>현지 탐험</strong>
+            <p>일상 대화·길 찾기</p>
+          </div>
+          <div class="stage-card">
+            <span class="stage-icon">🏠</span>
+            <strong>현지인</strong>
+            <p>토론·감정 표현</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="features">
+        <h2 class="section-title">이렇게 배워요</h2>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <span class="feature-icon">🤖</span>
+            <h3>AI 문장 생성</h3>
+            <p>매번 다른 실전 문장을 AI가 만들어줍니다</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🔊</span>
+            <h3>듣기 연습</h3>
+            <p>원어민 발음으로 듣고 따라해보세요</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🎤</span>
+            <h3>발음 체크</h3>
+            <p>마이크로 말하면 발음을 비교해줍니다</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">📖</span>
+            <h3>단어 탐구</h3>
+            <p>문장 속 단어를 터치하면 뜻과 예문이 나와요</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 학습 페이지 -->
+    <section class="page" id="page-learn" style="display:none;">
+      <div class="learn-container">
+        <!-- 난이도 선택 -->
+        <div class="stage-selector" id="stageSelector">
+          <h2 class="section-title">여행 단계를 선택하세요</h2>
+          <div class="stage-buttons">
+            <button class="stage-btn" data-stage="arrival">
+              <span class="stage-btn-icon">✈️</span>
+              <span class="stage-btn-label">도착</span>
+              <span class="stage-btn-desc">인사, 숫자, 주문 (A1)</span>
+            </button>
+            <button class="stage-btn" data-stage="explore">
+              <span class="stage-btn-icon">🚶</span>
+              <span class="stage-btn-label">현지 탐험</span>
+              <span class="stage-btn-desc">일상 대화, 길 찾기 (A2-B1)</span>
+            </button>
+            <button class="stage-btn" data-stage="local">
+              <span class="stage-btn-icon">🏠</span>
+              <span class="stage-btn-label">현지인</span>
+              <span class="stage-btn-desc">토론, 감정 표현 (B2+)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 학습 영역 -->
+        <div class="learn-area" id="learnArea" style="display:none;">
+          <div class="learn-header">
+            <button class="btn btn-ghost" id="backToStage">← 단계 선택</button>
+            <div class="learn-stage-badge" id="currentStageBadge"></div>
+          </div>
+
+          <!-- 문장 카드 -->
+          <div class="sentence-card" id="sentenceCard">
+            <div class="sentence-loading" id="sentenceLoading">
+              <div class="spinner"></div>
+              <p>AI가 문장을 만들고 있어요...</p>
+            </div>
+            <div class="sentence-content" id="sentenceContent" style="display:none;">
+              <p class="sentence-es" id="sentenceEs"></p>
+              <p class="sentence-ko" id="sentenceKo"></p>
+              <p class="sentence-hint" id="sentenceHint"></p>
+            </div>
+            <div class="sentence-error" id="sentenceError" style="display:none;">
+              <p id="errorMessage"></p>
+              <button class="btn btn-secondary" id="retryBtn">다시 시도</button>
+            </div>
+          </div>
+
+          <!-- 컨트롤 버튼 -->
+          <div class="learn-controls" id="learnControls" style="display:none;">
+            <button class="ctrl-btn" id="listenBtn" title="듣기">
+              <span>🔊</span> 듣기
+            </button>
+            <button class="ctrl-btn" id="micBtn" title="발음 체크">
+              <span>🎤</span> 말하기
+            </button>
+            <button class="ctrl-btn" id="nextBtn" title="다음 문장">
+              <span>➡️</span> 다음
+            </button>
+          </div>
+
+          <!-- 발음 결과 -->
+          <div class="pronunciation-result" id="pronResult" style="display:none;">
+            <h4>내 발음</h4>
+            <p class="pron-text" id="pronText"></p>
+            <div class="pron-score" id="pronScore"></div>
+          </div>
+
+          <!-- 단어 상세 (클릭 시) -->
+          <div class="word-detail" id="wordDetail" style="display:none;">
+            <div class="word-detail-header">
+              <h3 id="wordDetailTitle"></h3>
+              <button class="btn btn-ghost word-detail-close" id="wordDetailClose">✕</button>
+            </div>
+            <p class="word-meaning" id="wordMeaning"></p>
+            <p class="word-example" id="wordExample"></p>
+            <button class="ctrl-btn word-listen" id="wordListenBtn">🔊 발음 듣기</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 내 여권 페이지 -->
+    <section class="page" id="page-passport" style="display:none;">
+      <div class="passport-container">
+        <h2 class="section-title">🛂 내 여권</h2>
+
+        <!-- 스탬프 현황 -->
+        <div class="passport-stamps">
+          <h3>여행 스탬프</h3>
+          <div class="stamps-grid" id="stampsGrid">
+            <div class="stamp" data-stage="arrival">
+              <span class="stamp-icon">✈️</span>
+              <span class="stamp-label">도착</span>
+              <span class="stamp-count" id="stampArrival">0</span>
+            </div>
+            <div class="stamp" data-stage="explore">
+              <span class="stamp-icon">🚶</span>
+              <span class="stamp-label">현지 탐험</span>
+              <span class="stamp-count" id="stampExplore">0</span>
+            </div>
+            <div class="stamp" data-stage="local">
+              <span class="stamp-icon">🏠</span>
+              <span class="stamp-label">현지인</span>
+              <span class="stamp-count" id="stampLocal">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 오답 노트 -->
+        <div class="wrong-notes">
+          <h3>📝 오답 노트</h3>
+          <p class="wrong-notes-desc">틀린 발음이나 어려웠던 문장을 모아둡니다</p>
+          <div class="wrong-list" id="wrongList">
+            <p class="empty-msg">아직 기록이 없어요. 학습을 시작해보세요!</p>
+          </div>
+          <button class="btn btn-secondary" id="clearWrongBtn" style="display:none;">오답 노트 초기화</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 소개 페이지 -->
+    <section class="page" id="page-about" style="display:none;">
+      <div class="about-container">
+        <h2 class="section-title">Hola 올라 소개</h2>
+
+        <div class="about-section">
+          <h3>🌍 서비스 소개</h3>
+          <p>
+            <strong>Hola(올라)</strong>는 AI가 생성한 실전 스페인어 문장으로 학습하는 웹 서비스입니다.
+            여행 단계별 난이도로 구성되어, 초보부터 중급 이상까지 자신의 수준에 맞는 학습이 가능합니다.
+          </p>
+        </div>
+
+        <div class="about-section">
+          <h3>📖 사용 방법</h3>
+          <div class="how-to-list">
+            <div class="how-to-item">
+              <span class="how-to-num">1</span>
+              <div>
+                <strong>단계 선택</strong>
+                <p>도착(기초) → 현지 탐험(중급) → 현지인(고급) 중 선택</p>
+              </div>
+            </div>
+            <div class="how-to-item">
+              <span class="how-to-num">2</span>
+              <div>
+                <strong>문장 학습</strong>
+                <p>AI가 만든 문장을 읽고, 🔊 버튼으로 발음을 들어보세요</p>
+              </div>
+            </div>
+            <div class="how-to-item">
+              <span class="how-to-num">3</span>
+              <div>
+                <strong>발음 연습</strong>
+                <p>🎤 버튼을 눌러 따라 말하면, 내 발음과 비교할 수 있어요</p>
+              </div>
+            </div>
+            <div class="how-to-item">
+              <span class="how-to-num">4</span>
+              <div>
+                <strong>단어 탐구</strong>
+                <p>문장 속 단어를 클릭하면 뜻과 활용 예문을 볼 수 있어요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>🛠️ 기술 스택</h3>
+          <div class="tech-stack">
+            <span class="tech-tag">HTML / CSS / JavaScript</span>
+            <span class="tech-tag">Vercel Serverless (Python)</span>
+            <span class="tech-tag">OpenAI GPT-4o-mini</span>
+            <span class="tech-tag">Web Speech API</span>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>⚠️ 참고 사항</h3>
+          <p>
+            발음 체크 기능은 브라우저의 Web Speech API를 사용합니다.
+            Chrome 브라우저에서 가장 잘 동작하며, 일부 브라우저에서는 지원되지 않을 수 있습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 스크립트 -->
+  <script src="js/utils.js"></script>
+  <script src="js/learn.js"></script>
+  <script src="js/passport.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
