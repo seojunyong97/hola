@@ -12,6 +12,13 @@
   --text-light: #6B7280;
   --text-lighter: #9CA3AF;
   --border: #E5E7EB;
+  --nav-bg: rgba(255,255,255,0.95);
+  --nav-bg-solid: rgba(255,255,255,0.98);
+  --ok-bg: #D1FAE5;
+  --ok-text: #065F46;
+  --wrong-bg: #FEE2E2;
+  --wrong-text: #991B1B;
+  --pron-border: rgba(45,106,79,0.2);
   --shadow: 0 2px 12px rgba(0,0,0,0.06);
   --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
   --radius: 12px;
@@ -42,7 +49,7 @@ body {
   left: 0;
   right: 0;
   height: var(--nav-height);
-  background: rgba(255,255,255,0.95);
+  background: var(--nav-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   z-index: 100;
@@ -519,7 +526,7 @@ body {
 .pron-word-detail {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid rgba(45,106,79,0.2);
+  border-top: 1px solid var(--pron-border);
 }
 
 .pron-words {
@@ -531,8 +538,8 @@ body {
 }
 
 .pron-word-ok {
-  background: #D1FAE5;
-  color: #065F46;
+  background: var(--ok-bg);
+  color: var(--ok-text);
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
@@ -540,8 +547,8 @@ body {
 }
 
 .pron-word-wrong {
-  background: #FEE2E2;
-  color: #991B1B;
+  background: var(--wrong-bg);
+  color: var(--wrong-text);
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 600;
@@ -700,7 +707,7 @@ body {
 
 .wrong-item-words {
   font-size: 0.85rem;
-  color: #991B1B;
+  color: var(--wrong-text);
   margin-top: 4px;
 }
 
@@ -903,7 +910,7 @@ body {
     top: var(--nav-height);
     left: 0;
     right: 0;
-    background: rgba(255,255,255,0.98);
+    background: var(--nav-bg-solid);
     backdrop-filter: blur(10px);
     flex-direction: column;
     padding: 16px;
@@ -974,4 +981,71 @@ body {
     justify-content: center;
     min-width: 100px;
   }
+}
+
+/* ===== 다크 모드 ===== */
+:root[data-theme="dark"] {
+  --primary: #FF7A57;
+  --primary-dark: #E85D3A;
+  --primary-light: #3A2219;
+  --secondary: #52B788;
+  --secondary-light: #16352A;
+  --accent: #F4A261;
+  --bg: #121413;
+  --bg-card: #1C1F1E;
+  --text: #EDEDEA;
+  --text-light: #A8ADB2;
+  --text-lighter: #7C828A;
+  --border: #2E3331;
+  --nav-bg: rgba(18,20,19,0.92);
+  --nav-bg-solid: rgba(18,20,19,0.98);
+  --ok-bg: #14432F;
+  --ok-text: #A7F3D0;
+  --wrong-bg: #4A1F1F;
+  --wrong-text: #FCA5A5;
+  --pron-border: rgba(82,183,136,0.3);
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+  color-scheme: dark;
+}
+
+body,
+.nav,
+.sentence-card,
+.wrong-item,
+.stage-btn,
+.stage-card,
+.feature-item,
+.translate-box {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* 테마 토글 버튼 */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s, background-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-light);
+  transform: rotate(20deg) scale(1.08);
+}
+
+.theme-toggle:active {
+  transform: scale(0.9);
+}
+
+.nav-links li.theme-item {
+  display: flex;
+  align-items: center;
 }
