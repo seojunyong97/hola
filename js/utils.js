@@ -139,5 +139,35 @@ const Utils = {
       }
       throw err;
     }
+  },
+
+  /* --- 번역 API 호출 --- */
+  async translateKorean(text) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'translate', text }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeout);
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || '번역 오류가 발생했어요 (' + res.status + ')');
+      }
+
+      return await res.json();
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') {
+        throw new Error('응답이 너무 오래 걸려요. 잠시 후 다시 시도해주세요.');
+      }
+      throw err;
+    }
   }
 };

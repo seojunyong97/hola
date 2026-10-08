@@ -20,6 +20,14 @@ const Learn = {
     document.getElementById('retryBtn').addEventListener('click', () => this.loadSentence());
     document.getElementById('wordDetailClose').addEventListener('click', () => this.closeWordDetail());
     document.getElementById('wordListenBtn').addEventListener('click', () => this.listenWord());
+
+    // 번역 기능
+    document.getElementById('translateBtn').addEventListener('click', () => this.doTranslate());
+    document.getElementById('translateInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.doTranslate();
+    });
+    document.getElementById('translateListenBtn').addEventListener('click', () => this.listenTranslation());
+    document.getElementById('translateMicBtn').addEventListener('click', () => this.toggleTranslateRecording());
   },
 
   /* --- 단계 선택 --- */
@@ -232,5 +240,158 @@ const Learn = {
     if (this._currentWord) {
       Utils.speak(this._currentWord, 'es-ES');
     }
+  },
+
+  /* --- 한국어 → 스페인어 번역 --- */
+  translateSentence: null,
+  isTranslateRecording: false,
+  translateRecognition: null,
+
+  async doTranslate() {
+    const input = document.getElementById('translateInput');
+    const text = input.value.trim();
+    if (!text) {
+      input.focus();
+      return;
+    }
+
+    const resultEl = document.getElementById('translateResult');
+    const loadingEl = document.getElementById('translateLoading');
+    const contentEl = document.getElementById('translateContent');
+    const pronResultEl = document.getElementById('translatePronResult');
+
+    resultEl.style.display = 'block';
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
+    pronResultEl.style.display = 'none';
+
+    try {
+      const data = await Utils.translateKorean(text);
+      this.translateSentence = data;
+
+      // 스페인어 문장 표시 (클릭 가능한 단어)
+      const esEl = document.getElementById('translateEs');
+      esEl.innerHTML = '';
+      const words = data.sentence.split(/\s+/);
+      words.forEach((w, i) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = w;
+        span.addEventListener('click', () => this.onTranslateWordClick(w, data));
+        esEl.appendChild(span);
+        if (i < words.length - 1) esEl.appendChild(document.createTextNode(' '));
+      });
+
+      document.getElementById('translateKo').textContent = data.translation;
+      document.getElementById('translateHint').textContent = data.hint || '';
+
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
+    } catch (err) {
+      loadingEl.style.display = 'none';
+      resultEl.style.display = 'none';
+      alert(err.message);
+    }
+  },
+
+  onTranslateWordClick(word, data) {
+    const clean = word.replace(/[¿?¡!.,;:'"]/g, '');
+    if (!clean) return;
+
+    const detail = document.getElementById('wordDetail');
+    document.getElementById('wordDetailTitle').textContent = clean;
+
+    let meaning = '';
+    let example = '';
+    if (data && data.words) {
+      const wordInfo = data.words.find(
+        w => w.word.toLowerCase() === clean.toLowerCase()
+      );
+      if (wordInfo) {
+        meaning = wordInfo.meaning;
+        example = wordInfo.example || '';
+      }
+    }
+
+    document.getElementById('wordMeaning').textContent = meaning || '이 단어의 뜻을 확인하려면 사전을 참고해주세요.';
+    document.getElementById('wordExample').textContent = example;
+    detail.style.display = 'block';
+    this._currentWord = clean;
+  },
+
+  listenTranslation() {
+    if (!this.translateSentence) return;
+    if (!Utils.speak(this.translateSentence.sentence, 'es-ES')) {
+      alert('이 브라우저에서는 음성 재생을 지원하지 않아요.');
+    }
+  },
+
+  toggleTranslateRecording() {
+    if (this.isTranslateRecording) {
+      this.stopTranslateRecording();
+    } else {
+      this.startTranslateRecording();
+    }
+  },
+
+  startTranslateRecording() {
+    const recognition = Utils.createRecognition('es-ES');
+    if (!recognition) {
+      alert('이 브라우저에서는 음성 인식을 지원하지 않아요.\nChrome 브라우저를 사용해주세요.');
+      return;
+    }
+
+    this.translateRecognition = recognition;
+    this.isTranslateRecording = true;
+
+    const micBtn = document.getElementById('translateMicBtn');
+    micBtn.classList.add('recording');
+    micBtn.innerHTML = '<span>⏹️</span> 녹음 중...';
+
+    recognition.onresult = (e) => {
+      const spoken = e.results[0][0].transcript;
+      this.showTranslatePronResult(spoken);
+    };
+
+    recognition.onerror = (e) => {
+      this.stopTranslateRecordingUI();
+      if (e.error === 'no-speech') {
+        alert('음성이 감지되지 않았어요. 다시 시도해주세요.');
+      } else if (e.error !== 'aborted') {
+        alert('음성 인식 오류: ' + e.error);
+      }
+    };
+
+    recognition.onend = () => {
+      this.stopTranslateRecordingUI();
+    };
+
+    recognition.start();
+  },
+
+  stopTranslateRecording() {
+    if (this.translateRecognition) {
+      this.translateRecognition.stop();
+    }
+    this.stopTranslateRecordingUI();
+  },
+
+  stopTranslateRecordingUI() {
+    this.isTranslateRecording = false;
+    const micBtn = document.getElementById('translateMicBtn');
+    micBtn.classList.remove('recording');
+    micBtn.innerHTML = '<span>🎤</span> 말하기';
+  },
+
+  showTranslatePronResult(spoken) {
+    if (!this.translateSentence) return;
+
+    const result = Utils.comparePronunciation(this.translateSentence.sentence, spoken);
+
+    document.getElementById('translatePronResult').style.display = 'block';
+    document.getElementById('translatePronText').textContent = '"' + spoken + '"';
+    const scoreEl = document.getElementById('translatePronScore');
+    scoreEl.textContent = result.label + ' (일치율: ' + result.score + '%)';
+    scoreEl.className = 'pron-score ' + result.cls;
   }
 };
