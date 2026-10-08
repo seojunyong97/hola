@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import random
 
 from google import genai
 from google.genai import types
@@ -15,8 +16,37 @@ def _model_list():
     return ([custom] if custom else []) + DEFAULT_MODELS
 
 
+# 단계별 세부 상황 (매번 랜덤 선택 → 문장 다양성 확보)
+_ARRIVAL_TOPICS = [
+    "공항에서 입국 심사", "택시 타기", "호텔 체크인", "식당에서 주문",
+    "카페에서 커피 주문", "길에서 인사", "가격 묻기", "숫자 세기",
+    "자기소개", "날씨 이야기", "시간 묻기", "화장실 찾기",
+    "메뉴판 읽기", "호텔 조식", "환전소에서", "짐 찾기",
+]
+_EXPLORE_TOPICS = [
+    "지하철 타기", "버스 노선 묻기", "시장에서 쇼핑", "관광지 입장",
+    "박물관 관람", "해변에서", "약국에서 약 사기", "전화 통화",
+    "우체국에서 소포 보내기", "옷 가게에서", "친구에게 약속 제안",
+    "레스토랑 예약", "슈퍼마켓 장보기", "사진 찍어달라 부탁",
+    "호텔 불만 말하기", "렌터카 빌리기",
+]
+_LOCAL_TOPICS = [
+    "정치 뉴스 토론", "환경 문제 의견", "영화 리뷰", "역사 이야기",
+    "미래 계획 이야기", "실망 표현", "감사 표현", "가족 소개",
+    "직장 생활 이야기", "건강과 운동", "음식 문화 비교",
+    "교육 시스템 토론", "소셜 미디어 의견", "여행 추억",
+    "꿈과 목표", "유머와 농담",
+]
+
+_TOPIC_MAP = {
+    "arrival": _ARRIVAL_TOPICS,
+    "explore": _EXPLORE_TOPICS,
+    "local": _LOCAL_TOPICS,
+}
+
+
 def _get_prompt(stage, word=None):
-    """단계별 프롬프트 생성"""
+    """단계별 프롬프트 생성 — 매번 랜덤 세부 상황 선택"""
 
     stage_config = {
         "arrival": {
@@ -38,6 +68,9 @@ def _get_prompt(stage, word=None):
 
     config = stage_config.get(stage, stage_config["arrival"])
 
+    # 랜덤 세부 상황 선택
+    topic = random.choice(_TOPIC_MAP.get(stage, _ARRIVAL_TOPICS))
+
     word_instruction = ""
     if word:
         word_instruction = f'\n- 반드시 "{word}"라는 단어를 문장에 포함시켜주세요.'
@@ -47,13 +80,37 @@ def _get_prompt(stage, word=None):
 
 - 난이도: {config['level']}
 - 상황: {config['context']}
-- 문장 길이: {config['length']}{word_instruction}
+- 이번 세부 상황: **{topic}**
+- 문장 길이: {config['length']}
+- 이전에 생성한 문장과 절대 겹치지 않는 완전히 새로운 문장을 만들어주세요.
+- 다양한 어휘와 문법 구조를 사용해주세요.{word_instruction}
 
 반드시 아래 JSON 형식으로만 응답하세요 (마크다운 없이):
 {{
   "sentence": "스페인어 문장",
   "translation": "한국어 번역",
   "hint": "문법 또는 발음 팁 (한국어, 1줄)",
+  "words": [
+    {{"word": "주요단어1", "meaning": "뜻 (한국어)", "example": "예문 (스페인어)"}},
+    {{"word": "주요단어2", "meaning": "뜻 (한국어)", "example": "예문 (스페인어)"}}
+  ]
+}}
+
+words에는 문장의 핵심 단어 2~4개를 포함해주세요."""
+
+
+def _get_translate_prompt(korean_text):
+    """한국어 → 스페인어 번역 프롬프트"""
+    return f"""당신은 한국어-스페인어 번역 도우미입니다.
+아래 한국어 문장을 스페인어로 번역하고, 학습에 도움이 되는 정보를 함께 제공해주세요.
+
+한국어: "{korean_text}"
+
+반드시 아래 JSON 형식으로만 응답하세요 (마크다운 없이):
+{{
+  "sentence": "번역된 스페인어 문장",
+  "translation": "{korean_text}",
+  "hint": "이 문장의 문법 포인트 또는 유용한 팁 (한국어, 1줄)",
   "words": [
     {{"word": "주요단어1", "meaning": "뜻 (한국어)", "example": "예문 (스페인어)"}},
     {{"word": "주요단어2", "meaning": "뜻 (한국어)", "example": "예문 (스페인어)"}}
@@ -73,7 +130,7 @@ def _generate(client, prompt):
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    temperature=0.9,
+                    temperature=0.95,
                     max_output_tokens=600,
                 ),
             )
@@ -101,11 +158,6 @@ class handler(BaseHTTPRequestHandler):
                 return self._error(400, "요청 본문이 비어있어요.")
 
             body = json.loads(self.rfile.read(content_length))
-            stage = str(body.get("stage", "")).strip()
-            word = str(body.get("word", "") or "").strip()[:30] or None
-
-            if stage not in ("arrival", "explore", "local"):
-                return self._error(400, "올바른 단계를 선택해주세요.")
 
             # API 키 확인 (환경 변수)
             api_key = os.environ.get("GEMINI_API_KEY")
@@ -113,7 +165,23 @@ class handler(BaseHTTPRequestHandler):
                 return self._error(500, "서버 설정 오류: API 키가 없어요.")
 
             client = genai.Client(api_key=api_key)
-            result_text = _generate(client, _get_prompt(stage, word)).strip()
+
+            # 번역 모드 vs 학습 문장 생성 모드
+            mode = str(body.get("mode", "")).strip()
+
+            if mode == "translate":
+                korean_text = str(body.get("text", "")).strip()[:200]
+                if not korean_text:
+                    return self._error(400, "번역할 한국어 문장을 입력해주세요.")
+                prompt = _get_translate_prompt(korean_text)
+            else:
+                stage = str(body.get("stage", "")).strip()
+                word = str(body.get("word", "") or "").strip()[:30] or None
+                if stage not in ("arrival", "explore", "local"):
+                    return self._error(400, "올바른 단계를 선택해주세요.")
+                prompt = _get_prompt(stage, word)
+
+            result_text = _generate(client, prompt).strip()
 
             # 혹시 마크다운 코드블록이 붙어 있으면 제거
             if result_text.startswith("```"):
