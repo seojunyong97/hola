@@ -50,19 +50,22 @@ def _get_prompt(stage, word=None):
 
     stage_config = {
         "arrival": {
-            "level": "A1 (초급)",
-            "context": "공항 도착, 호텔 체크인, 식당 주문, 인사, 숫자, 기본 질문",
-            "length": "3~6 단어",
+            "level": "완전 초보 (A1 이하)",
+            "context": "인사, 숫자, 주문, 감사, 이름 묻기 등 가장 기본적인 표현",
+            "length": "2~4 단어",
+            "extra": "초등학생도 이해할 수 있을 정도로 매우 쉬운 문장만 만들어주세요. 예: Hola, Gracias, Dos cafés, por favor.",
         },
         "explore": {
-            "level": "A2-B1 (중급)",
-            "context": "길 찾기, 쇼핑, 일상 대화, 교통, 관광지 설명",
-            "length": "6~12 단어",
+            "level": "초급 (A1-A2)",
+            "context": "길 찾기, 쇼핑, 간단한 일상 대화, 음식 주문",
+            "length": "4~7 단어",
+            "extra": "현재 시제만 사용하고, 기본 동사(ser, estar, tener, querer, ir)로만 문장을 만들어주세요.",
         },
         "local": {
-            "level": "B2+ (고급)",
-            "context": "토론, 감정 표현, 뉴스, 문화 비교, 추상적 주제",
-            "length": "10~18 단어",
+            "level": "중급 (A2-B1)",
+            "context": "일상 대화, 감정 표현, 취미, 경험 이야기",
+            "length": "6~10 단어",
+            "extra": "과거 시제도 가능하지만 복잡한 문법(접속법 등)은 피해주세요.",
         },
     }
 
@@ -82,6 +85,7 @@ def _get_prompt(stage, word=None):
 - 상황: {config['context']}
 - 이번 세부 상황: **{topic}**
 - 문장 길이: {config['length']}
+- {config['extra']}
 - 이전에 생성한 문장과 절대 겹치지 않는 완전히 새로운 문장을 만들어주세요.
 - 다양한 어휘와 문법 구조를 사용해주세요.{word_instruction}
 
