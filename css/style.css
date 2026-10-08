@@ -704,6 +704,42 @@ body {
   margin-top: 4px;
 }
 
+.wrong-item-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.wrong-item-controls .ctrl-btn {
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  min-width: auto;
+}
+
+.wrong-pron-result {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+}
+
+.wrong-pron-result h4 {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: var(--text-light);
+}
+
+.wrong-pron-result .pron-text {
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.wrong-pron-result .pron-score {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
 .empty-msg {
   text-align: center;
   color: var(--text-lighter);
