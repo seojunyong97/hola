@@ -741,6 +741,74 @@ body {
   font-weight: 500;
 }
 
+/* ===== 번역 기능 ===== */
+.translate-box {
+  background: var(--bg-card);
+  border: 2px dashed var(--secondary);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.translate-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--secondary);
+  margin-bottom: 14px;
+}
+
+.translate-input-wrap {
+  display: flex;
+  gap: 10px;
+}
+
+.translate-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: 0.2s;
+}
+
+.translate-input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+
+.translate-btn {
+  white-space: nowrap;
+  padding: 12px 20px;
+}
+
+.translate-result {
+  margin-top: 16px;
+}
+
+.translate-result .translate-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-light);
+}
+
+.translate-content {
+  text-align: center;
+  padding: 16px 0 0;
+}
+
+.translate-es {
+  margin-bottom: 12px;
+}
+
+.translate-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 /* ===== 반응형 ===== */
 @media (max-width: 640px) {
   .nav-toggle {
@@ -809,5 +877,19 @@ body {
   .stamp {
     max-width: 280px;
     width: 100%;
+  }
+
+  .translate-input-wrap {
+    flex-direction: column;
+  }
+
+  .translate-controls {
+    flex-wrap: wrap;
+  }
+
+  .translate-controls .ctrl-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 100px;
   }
 }
