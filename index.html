@@ -169,6 +169,37 @@
             <p class="word-example" id="wordExample"></p>
             <button class="ctrl-btn word-listen" id="wordListenBtn">🔊 발음 듣기</button>
           </div>
+
+          <!-- 한국어 → 스페인어 번역 -->
+          <div class="translate-box">
+            <h4 class="translate-title">✏️ 한국어로 쓰고, 스페인어로 배우기</h4>
+            <div class="translate-input-wrap">
+              <input type="text" id="translateInput" class="translate-input"
+                     placeholder="한국어 문장을 입력하세요 (예: 커피 한 잔 주세요)"
+                     maxlength="200">
+              <button class="btn btn-primary translate-btn" id="translateBtn">번역</button>
+            </div>
+            <div class="translate-result" id="translateResult" style="display:none;">
+              <div class="translate-loading" id="translateLoading" style="display:none;">
+                <div class="spinner"></div>
+                <p>번역 중...</p>
+              </div>
+              <div class="translate-content" id="translateContent" style="display:none;">
+                <p class="sentence-es translate-es" id="translateEs"></p>
+                <p class="sentence-ko" id="translateKo"></p>
+                <p class="sentence-hint" id="translateHint"></p>
+                <div class="translate-controls">
+                  <button class="ctrl-btn" id="translateListenBtn">🔊 듣기</button>
+                  <button class="ctrl-btn" id="translateMicBtn">🎤 말하기</button>
+                </div>
+                <div class="pronunciation-result" id="translatePronResult" style="display:none;">
+                  <h4>내 발음</h4>
+                  <p class="pron-text" id="translatePronText"></p>
+                  <div class="pron-score" id="translatePronScore"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
