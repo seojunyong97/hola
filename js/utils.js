@@ -75,7 +75,7 @@ const Utils = {
     return recognition;
   },
 
-  /* --- 발음 비교 (간단 유사도) --- */
+  /* --- 발음 비교 (단어별 상세 비교) --- */
   comparePronunciation(original, spoken) {
     const normalize = (s) => s.toLowerCase()
       .replace(/[¿?¡!.,;:'"]/g, '')
@@ -85,20 +85,28 @@ const Utils = {
     const a = normalize(original);
     const b = normalize(spoken);
 
-    if (a === b) return { score: 100, label: '완벽해요! 🎉', cls: 'good' };
-
-    // 단어 단위 비교
     const wordsA = a.split(' ');
     const wordsB = b.split(' ');
-    let matches = 0;
-    wordsA.forEach(w => {
-      if (wordsB.includes(w)) matches++;
-    });
 
+    // 단어별 매칭 결과
+    const wordResults = wordsA.map(w => ({
+      word: w,
+      correct: wordsB.includes(w)
+    }));
+
+    const matches = wordResults.filter(r => r.correct).length;
     const score = Math.round((matches / Math.max(wordsA.length, 1)) * 100);
-    if (score >= 70) return { score, label: '잘했어요! 👏', cls: 'good' };
-    if (score >= 40) return { score, label: '조금 더 연습해봐요 💪', cls: 'fair' };
-    return { score, label: '다시 도전해봐요! 🔄', cls: 'poor' };
+
+    let label, cls;
+    if (score === 100) { label = '완벽해요! 🎉'; cls = 'good'; }
+    else if (score >= 70) { label = '잘했어요! 👏'; cls = 'good'; }
+    else if (score >= 40) { label = '조금 더 연습해봐요 💪'; cls = 'fair'; }
+    else { label = '다시 도전해봐요! 🔄'; cls = 'poor'; }
+
+    // 틀린 단어 목록
+    const wrongWords = wordResults.filter(r => !r.correct).map(r => r.word);
+
+    return { score, label, cls, wordResults, wrongWords };
   },
 
   /* --- 단계 정보 --- */

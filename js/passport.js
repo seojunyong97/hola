@@ -33,10 +33,14 @@ const Passport = {
     clearBtn.style.display = 'inline-flex';
     list.innerHTML = notes.map(note => {
       const stageInfo = Utils.stageInfo[note.stage] || {};
+      const wrongWordsHtml = (note.wrongWords && note.wrongWords.length > 0)
+        ? '<p class="wrong-item-words">틀린 단어: <strong>' + note.wrongWords.map(w => this.escapeHtml(w)).join(', ') + '</strong></p>'
+        : '';
       return '<div class="wrong-item">' +
         '<p class="wrong-item-es">' + (stageInfo.icon || '') + ' ' + this.escapeHtml(note.es) + '</p>' +
         '<p class="wrong-item-ko">' + this.escapeHtml(note.ko) + '</p>' +
         (note.my ? '<p class="wrong-item-my">내 발음: "' + this.escapeHtml(note.my) + '"</p>' : '') +
+        wrongWordsHtml +
         '</div>';
     }).join('');
   },

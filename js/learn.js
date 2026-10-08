@@ -194,17 +194,43 @@ const Learn = {
     const result = Utils.comparePronunciation(this.currentSentence.sentence, spoken);
 
     document.getElementById('pronResult').style.display = 'block';
+
+    // 내 발음 텍스트
     document.getElementById('pronText').textContent = '"' + spoken + '"';
+
+    // 점수 + 라벨
     const scoreEl = document.getElementById('pronScore');
-    scoreEl.textContent = result.label + ' (일치율: ' + result.score + '%)';
+    scoreEl.textContent = result.label + ' (' + result.score + '%)';
     scoreEl.className = 'pron-score ' + result.cls;
 
-    // 점수가 낮으면 오답 노트에 추가
+    // 단어별 상세 결과 표시
+    const detailEl = document.getElementById('pronWordDetail');
+    if (detailEl) {
+      let html = '<div class="pron-words">';
+      result.wordResults.forEach(r => {
+        if (r.correct) {
+          html += '<span class="pron-word-ok">' + r.word + '</span> ';
+        } else {
+          html += '<span class="pron-word-wrong">' + r.word + '</span> ';
+        }
+      });
+      html += '</div>';
+
+      if (result.wrongWords.length > 0) {
+        html += '<p class="pron-wrong-list">틀린 단어: <strong>' + result.wrongWords.join(', ') + '</strong> ← 다시 들어보세요!</p>';
+      }
+
+      detailEl.innerHTML = html;
+      detailEl.style.display = 'block';
+    }
+
+    // 점수가 낮으면 오답 노트에 추가 (틀린 단어도 기록)
     if (result.score < 70 && this.currentSentence) {
       Utils.addWrongNote({
         es: this.currentSentence.sentence,
         ko: this.currentSentence.translation,
         my: spoken,
+        wrongWords: result.wrongWords,
         stage: this.currentStage,
         date: new Date().toLocaleDateString('ko-KR')
       });
