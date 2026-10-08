@@ -515,6 +515,46 @@ body {
   color: var(--primary);
 }
 
+/* 단어별 발음 결과 */
+.pron-word-detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(45,106,79,0.2);
+}
+
+.pron-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.pron-word-ok {
+  background: #D1FAE5;
+  color: #065F46;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.pron-word-wrong {
+  background: #FEE2E2;
+  color: #991B1B;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-decoration: line-through;
+}
+
+.pron-wrong-list {
+  font-size: 0.9rem;
+  color: var(--primary);
+  margin-top: 6px;
+}
+
 /* 단어 상세 */
 .word-detail {
   background: var(--bg-card);
@@ -655,6 +695,12 @@ body {
 .wrong-item-my {
   font-size: 0.85rem;
   color: var(--primary);
+  margin-top: 4px;
+}
+
+.wrong-item-words {
+  font-size: 0.85rem;
+  color: #991B1B;
   margin-top: 4px;
 }
 
