@@ -10,6 +10,7 @@ const App = {
 
     // 네비게이션 이벤트
     this.setupNav();
+    this.setupTheme();
 
     // 해시 라우팅
     window.addEventListener('hashchange', () => this.route());
@@ -38,6 +39,27 @@ const App = {
       if (!e.target.closest('.nav-inner')) {
         links.classList.remove('open');
       }
+    });
+  },
+
+  /* --- 다크 모드 --- */
+  setupTheme() {
+    const btn = document.getElementById('themeToggle');
+    if (!btn) return;
+
+    const apply = (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', theme === 'dark' ? '라이트 모드 전환' : '다크 모드 전환');
+      btn.title = btn.getAttribute('aria-label');
+    };
+
+    apply(document.documentElement.getAttribute('data-theme') || 'light');
+
+    btn.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      apply(next);
+      try { localStorage.setItem('hola_theme', next); } catch (e) { /* 저장 실패 무시 */ }
     });
   },
 
