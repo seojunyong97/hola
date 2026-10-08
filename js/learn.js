@@ -5,6 +5,7 @@ const Learn = {
   currentSentence: null,
   recognition: null,
   isRecording: false,
+  recentSentences: [],  // 최근 문장 기록 (중복 방지)
 
   init() {
     // 단계 버튼
@@ -49,14 +50,28 @@ const Learn = {
     this.hidePronResult();
   },
 
-  /* --- 문장 로드 --- */
+  /* --- 문장 로드 (중복 시 최대 3회 재시도) --- */
   async loadSentence(word) {
     this.showLoading();
     this.closeWordDetail();
     this.hidePronResult();
 
+    const MAX_RETRY = 3;
+    let attempt = 0;
+    let data = null;
+
     try {
-      const data = await Utils.fetchSentence(this.currentStage, word);
+      while (attempt < MAX_RETRY) {
+        data = await Utils.fetchSentence(this.currentStage, word);
+        // 최근 문장과 겹치지 않으면 OK
+        if (!this.recentSentences.includes(data.sentence)) break;
+        attempt++;
+      }
+
+      // 최근 목록에 추가 (최대 20개 유지)
+      this.recentSentences.push(data.sentence);
+      if (this.recentSentences.length > 20) this.recentSentences.shift();
+
       this.currentSentence = data;
       this.showSentence(data);
 
